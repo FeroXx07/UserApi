@@ -1,4 +1,4 @@
-# task-springboot-basics
+# UserApi
 
 - Què és una API REST i com funciona.
 - Com definir endpoints a través de controladors amb @RestController.
