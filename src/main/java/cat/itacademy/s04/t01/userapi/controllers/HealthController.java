@@ -9,6 +9,6 @@ public class HealthController {
 
     @GetMapping("/health")
     public Status checkHealth() {
-        return new Status("ok");
+        return new Status("OK");
     }
 }
