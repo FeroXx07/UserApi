@@ -1,4 +1,4 @@
-package cat.itacademy.s04.t01.userapi.dto.mappers;
+package cat.itacademy.s04.t01.userapi.mappers;
 
 import cat.itacademy.s04.t01.userapi.dto.request.UserCreateRequest;
 import cat.itacademy.s04.t01.userapi.dto.response.UserResponse;
