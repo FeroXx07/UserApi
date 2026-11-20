@@ -1,37 +1,22 @@
 package cat.itacademy.s04.t01.userapi.entities;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
 import java.util.UUID;
 
+@Data
 public class User {
 
+    @NotNull
     private UUID id;
+
+    @NotBlank
     private String name;
+
+    @Email
+    @NotBlank
     private String email;
-
-    public User(UUID id, String name, String email) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                '}';
-    }
 }
