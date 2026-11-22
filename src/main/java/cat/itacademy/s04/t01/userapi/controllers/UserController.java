@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -35,8 +36,20 @@ public class UserController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<UserResponse>> getUsers() {
-        return ResponseEntity.ok(users.stream().map(userMapper::toResponse).toList());
+    public ResponseEntity<List<UserResponse>> getUsers(@RequestParam Optional<String> name) {
+        if (name.isEmpty()) {
+            return ResponseEntity.ok(users
+                    .stream()
+                    .map(userMapper::toResponse)
+                    .toList()
+            );
+        }
+        return ResponseEntity.ok(users
+                .stream()
+                .filter(u -> u.getName().equalsIgnoreCase(name.get()))
+                .map(userMapper::toResponse)
+                .toList());
+
     }
 
     @GetMapping("/{id}")
@@ -45,7 +58,7 @@ public class UserController {
 
         UserResponse response = users
                 .stream()
-                .filter(u -> u.getId() == uuid)
+                .filter(u -> u.getId().equals(uuid))
                 .findFirst()
                 .map(userMapper::toResponse)
                 .orElseThrow(() ->
