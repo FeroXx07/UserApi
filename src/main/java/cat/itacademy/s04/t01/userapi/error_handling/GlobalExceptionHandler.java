@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
 
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
-        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "An unexpected error occurred", request.getRequestURI(), null);
+        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "AN_UNEXPECTED_ERROR_OCURRED", request.getRequestURI(), null);
 
         return ResponseEntity.status(status).body(response);
     }
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "Validation failed", request.getRequestURI(), errors);
+        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "VALIDATION_FAILED", request.getRequestURI(), errors);
 
         return ResponseEntity.badRequest().body(response);
     }
