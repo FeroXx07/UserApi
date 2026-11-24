@@ -1,5 +1,6 @@
 package cat.itacademy.s04.t01.userapi.error_handling;
 
+import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceNotFound;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,4 +50,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(response);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "ILLEGAL_ARGUMENT: " + ex.getMessage(), request.getRequestURI(), null);
+
+        return ResponseEntity.status(status).body(response);
+    }
 }
