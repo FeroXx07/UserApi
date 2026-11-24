@@ -1,10 +1,11 @@
 package cat.itacademy.s04.t01.userapi.controllers;
 
-import cat.itacademy.s04.t01.userapi.error_handling.ResourceNotFound;
+import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceNotFound;
 import cat.itacademy.s04.t01.userapi.mappers.UserMapper;
 import cat.itacademy.s04.t01.userapi.dto.request.UserCreateRequest;
 import cat.itacademy.s04.t01.userapi.dto.response.UserResponse;
 import cat.itacademy.s04.t01.userapi.entities.User;
+import cat.itacademy.s04.t01.userapi.utility.UUID_Utility;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +55,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> get(@PathVariable String id) {
-        UUID uuid = UUID.fromString(id);
+        UUID uuid = UUID_Utility.fromString(id);
 
         UserResponse response = users
                 .stream()
