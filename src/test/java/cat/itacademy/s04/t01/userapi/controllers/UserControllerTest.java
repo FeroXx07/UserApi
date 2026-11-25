@@ -33,9 +33,15 @@ public class UserControllerTest {
     @MockitoBean
     private UserMapper userMapper;
 
+    UserCreateRequest userCreateRequest = null;
+    User userEntity = null;
+    UserResponse userResponse = null;
+
     @BeforeEach
     void beforeEach() {
-
+        userCreateRequest = new UserCreateRequest("Nin", "andreu.nin@example.com");
+        userEntity = new User("Nin", "andreu.nin@example.com");
+        userResponse = new UserResponse(userEntity.getId(), "Nin", "andreu.nin@example.com");
     }
 
     @Test
@@ -51,14 +57,11 @@ public class UserControllerTest {
         // Simula POST /users amb JSON
         // Espera que torni el mateix usuari amb UUID no nul
 
-        UserCreateRequest userRequest = new UserCreateRequest("Nin", "andreu.nin@example.com");
-        User userEntity = new User("Nin", "andreu.nin@example.com");
-        UserResponse userResponse = new UserResponse(userEntity.getId(), "Nin", "andreu.nin@example.com");
+        String requestJson = objectMapper.writeValueAsString(userCreateRequest);
 
-        String requestJson = objectMapper.writeValueAsString(userRequest);
-
-        when(userMapper.toEntity(userRequest))
+        when(userMapper.toEntity(userCreateRequest))
                 .thenReturn(userEntity);
+
         when(userMapper.toResponse(userEntity))
                 .thenReturn(userResponse);
 
@@ -77,6 +80,7 @@ public class UserControllerTest {
     void getUserById_returnsCorrectUser() {
         // Primer afegeix un usuari amb POST
         // Després GET /users/{id} i comprova que torni aquest usuari
+
     }
 
     @Test
