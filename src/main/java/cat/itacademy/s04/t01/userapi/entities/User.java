@@ -19,4 +19,9 @@ public class User {
     @Email
     @NotBlank
     private String email;
+
+    public User(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 }
