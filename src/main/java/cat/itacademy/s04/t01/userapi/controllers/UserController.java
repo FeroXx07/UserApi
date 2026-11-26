@@ -5,6 +5,7 @@ import cat.itacademy.s04.t01.userapi.mappers.UserMapper;
 import cat.itacademy.s04.t01.userapi.dto.request.UserCreateRequest;
 import cat.itacademy.s04.t01.userapi.dto.response.UserResponse;
 import cat.itacademy.s04.t01.userapi.entities.User;
+import cat.itacademy.s04.t01.userapi.services.UserService;
 import cat.itacademy.s04.t01.userapi.utility.UUID_Utility;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,53 +21,32 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserMapper userMapper;
-    private List<User> users;
 
-    public UserController(UserMapper userMapper) {
-        this.userMapper = userMapper;
-        users = new ArrayList<>();
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     // Later use a @Valid @RequestBody createUserDto object
     @PostMapping("")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
-        User user = userMapper.toEntity(request);
-        users.add(user);
-        UserResponse response = userMapper.toResponse(user);
-        return ResponseEntity.created(URI.create("/users/" + response.id())).body(response);
+        UserResponse response = userService.create(request);
+        return ResponseEntity
+                .created(URI.create("/users/" + response.id()))
+                .body(response);
     }
 
     @GetMapping("")
     public ResponseEntity<List<UserResponse>> getUsers(@RequestParam Optional<String> name) {
-        if (name.isEmpty()) {
-            return ResponseEntity.ok(users
-                    .stream()
-                    .map(userMapper::toResponse)
-                    .toList()
-            );
-        }
-        return ResponseEntity.ok(users
-                .stream()
-                .filter(u -> u.getName().equalsIgnoreCase(name.get()))
-                .map(userMapper::toResponse)
-                .toList());
+        return name
+                .map(s -> ResponseEntity.ok(userService.getAllWithName(s)))
+                .orElseGet(() -> ResponseEntity.ok(userService.getAll()));
 
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> get(@PathVariable String id) {
-        UUID uuid = UUID_Utility.fromString(id);
-
-        UserResponse response = users
-                .stream()
-                .filter(u -> u.getId().equals(uuid))
-                .findFirst()
-                .map(userMapper::toResponse)
-                .orElseThrow(() ->
-                        new ResourceNotFound("User not found with id:" + uuid)
-                );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(userService.getWithId(id));
     }
 }
