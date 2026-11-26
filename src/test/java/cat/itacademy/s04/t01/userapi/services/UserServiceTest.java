@@ -4,13 +4,16 @@ import cat.itacademy.s04.t01.userapi.dto.request.UserCreateRequest;
 import cat.itacademy.s04.t01.userapi.entities.User;
 import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceAlreadyExists;
 import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceNotFound;
+import cat.itacademy.s04.t01.userapi.mappers.UserMapper;
 import cat.itacademy.s04.t01.userapi.repositories.UserRepository;
 import cat.itacademy.s04.t01.userapi.services.impl.UserServiceImpl;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -29,8 +32,12 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Spy
+    private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+
     @InjectMocks
     private UserServiceImpl userService;
+
 
     // ERROR PATH
     // Volem comprovar què passa quan l’email ja existeix.
@@ -58,7 +65,6 @@ public class UserServiceTest {
     }
 
     @Test
-    @Disabled
     void getUserById_ShouldThrowExceptionWhenDoesNotExist() {
         UUID id = UUID.randomUUID();
 
@@ -70,7 +76,7 @@ public class UserServiceTest {
          * There is troubling in injecting an instance of user mapper to the service class.
          * Find solution to inject in mockito only context.
          *  */
-        Throwable thrown = catchThrowable(() -> userService.create(new UserCreateRequest("Luis", "any@example.com")));
+        Throwable thrown = catchThrowable(() -> userService.getWithId(id.toString()));
 
         then(thrown)
                 .isInstanceOf(ResourceNotFound.class)
