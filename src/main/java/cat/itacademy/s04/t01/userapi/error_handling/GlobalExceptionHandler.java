@@ -1,5 +1,6 @@
 package cat.itacademy.s04.t01.userapi.error_handling;
 
+import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceAlreadyExists;
 import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceNotFound;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,16 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
         ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "ILLEGAL_ARGUMENT: " + ex.getMessage(), request.getRequestURI(), null);
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExists.class)
+    public ResponseEntity<ApiError> handleResourceAlreadyExists(Exception ex, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "RESOURCE_ALREADY_EXISTS: " + ex.getMessage(), request.getRequestURI(), null);
 
         return ResponseEntity.status(status).body(response);
     }
