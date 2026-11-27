@@ -80,8 +80,15 @@ public class UserServiceTest {
     @Test
     void createUser_ShouldCreateWhenInputIsValid() {
         UserCreateRequest createRequest = new UserCreateRequest("ABC","ABC@XYZ.com");
+
+        given(userRepository.existsByEmail(createRequest.email()))
+                .willReturn(false);
+
+        given(userRepository.save(any(User.class))).willReturn(new User(createRequest.name(), createRequest.email()));
+
         UserResponse createResponse = userService.create(createRequest);
 
+        assertThat(createResponse).isNotNull();
         assertThat(createResponse.id()).isNotNull();
         assertThat(createResponse.email()).isEqualTo("ABC@XYZ.com");
         assertThat(createResponse.name()).isEqualTo("ABC");
