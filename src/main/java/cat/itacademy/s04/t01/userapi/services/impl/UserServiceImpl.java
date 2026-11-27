@@ -1,5 +1,6 @@
 package cat.itacademy.s04.t01.userapi.services.impl;
 
+import cat.itacademy.s04.t01.userapi.RequestValidator;
 import cat.itacademy.s04.t01.userapi.dto.request.UserCreateRequest;
 import cat.itacademy.s04.t01.userapi.dto.response.UserResponse;
 import cat.itacademy.s04.t01.userapi.entities.User;
@@ -22,13 +23,18 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
 
-    public UserServiceImpl(UserMapper userMapper, UserRepository repository) {
+    private final RequestValidator requestValidator;
+
+    public UserServiceImpl(UserMapper userMapper, UserRepository repository, RequestValidator requestValidator) {
         this.userMapper = userMapper;
         this.repository = repository;
+        this.requestValidator = requestValidator;
     }
 
     @Override
     public UserResponse create(UserCreateRequest createReq) {
+        requestValidator.validate(createReq);
+
         String email = createReq.email();
 
         if (repository.existsByEmail(email)) {
@@ -50,6 +56,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllWithName(String name) {
+        validateStrNotEmpty(name, "Name");
+
         return repository.searchByName(name)
                 .stream()
                 .map(userMapper::toResponse)
@@ -58,6 +66,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getWithId(String id) {
+        validateStrNotEmpty(id, "id");
+
         Optional<User> user = repository.findById(UUID_Utility.fromString(id));
 
         if (user.isEmpty()) {
@@ -65,5 +75,11 @@ public class UserServiceImpl implements UserService {
         }
 
         return userMapper.toResponse(user.get());
+    }
+
+    private void validateStrNotEmpty(String str, String name) {
+        if (str == null || str.isBlank()) {
+            throw new IllegalArgumentException(name + " cannot be null or empty");
+        }
     }
 }
