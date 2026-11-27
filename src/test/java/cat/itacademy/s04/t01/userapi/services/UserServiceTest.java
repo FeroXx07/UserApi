@@ -1,12 +1,18 @@
 package cat.itacademy.s04.t01.userapi.services;
 
+import cat.itacademy.s04.t01.userapi.RequestValidator;
 import cat.itacademy.s04.t01.userapi.dto.request.UserCreateRequest;
+import cat.itacademy.s04.t01.userapi.dto.response.UserResponse;
 import cat.itacademy.s04.t01.userapi.entities.User;
 import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceAlreadyExists;
 import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceNotFound;
 import cat.itacademy.s04.t01.userapi.mappers.UserMapper;
 import cat.itacademy.s04.t01.userapi.repositories.UserRepository;
 import cat.itacademy.s04.t01.userapi.services.impl.UserServiceImpl;
+import cat.itacademy.s04.t01.userapi.utility.UUID_Utility;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +22,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.catchThrowable;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +42,11 @@ public class UserServiceTest {
 
     @Spy
     private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+
+    @Spy
+    private RequestValidator requestValidator = new RequestValidator(
+            Validation.buildDefaultValidatorFactory().getValidator()
+    );
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -65,21 +78,63 @@ public class UserServiceTest {
     }
 
     @Test
-    void getUserById_ShouldThrowExceptionWhenDoesNotExist() {
+    void createUser_ShouldCreateWhenInputIsValid() {
+        UserCreateRequest createRequest = new UserCreateRequest("ABC","ABC@XYZ.com");
+        UserResponse createResponse = userService.create(createRequest);
+
+        assertThat(createResponse.id()).isNotNull();
+        assertThat(createResponse.email()).isEqualTo("ABC@XYZ.com");
+        assertThat(createResponse.name()).isEqualTo("ABC");
+    }
+
+    @Test
+    void createUser_ShouldThrowWhenInputIsInValid() {
+        UserCreateRequest createRequestInvalidA = new UserCreateRequest("ABC","ABCXYZ.com");
+        UserCreateRequest createRequestInvalidB = new UserCreateRequest("","ABC@XYZ.com");
+
+        Throwable thrownA = catchThrowable(() -> userService.create(createRequestInvalidA));
+        Throwable thrownB = catchThrowable(() -> userService.create(createRequestInvalidB));
+
+        then(thrownA)
+                .isInstanceOf(ConstraintViolationException.class);
+
+        then(thrownB)
+                .isInstanceOf(ConstraintViolationException.class);
+    }
+
+    @Test
+    void getUserById_ShouldThrowWhenDoesNotExist() {
         UUID id = UUID.randomUUID();
 
         given(userRepository.findById(id))
                 .willReturn(Optional.empty());
 
-        /* TODO:
-         * Because the unit test class is not in a spring context, and doesn't need to be.
-         * There is troubling in injecting an instance of user mapper to the service class.
-         * Find solution to inject in mockito only context.
-         *  */
         Throwable thrown = catchThrowable(() -> userService.getWithId(id.toString()));
 
         then(thrown)
                 .isInstanceOf(ResourceNotFound.class)
                 .hasMessageContaining("User not found with id:");
+    }
+    @Test
+    void getUserById_ShouldThrowInvalidId() {
+        String emptyId = "";
+        Throwable thrownEmpty = catchThrowable(() -> userService.getWithId(emptyId));
+        then(thrownEmpty)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("cannot be null or empty");
+
+        String invalidId = "ASDASD-ASDASD-123123-343";
+        Throwable thrownInvalid = catchThrowable(() -> userService.getWithId(invalidId));
+        then(thrownInvalid)
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void getUserByName_ShouldThrowInvalidInput() {
+        String emptyName = "";
+        Throwable thrownEmpty = catchThrowable(() -> userService.getAllWithName(emptyName));
+        then(thrownEmpty)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("cannot be null or empty");
     }
 }
