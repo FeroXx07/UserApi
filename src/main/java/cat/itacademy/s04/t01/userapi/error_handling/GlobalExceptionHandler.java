@@ -3,6 +3,7 @@ package cat.itacademy.s04.t01.userapi.error_handling;
 import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceAlreadyExists;
 import cat.itacademy.s04.t01.userapi.error_handling.exceptions.ResourceNotFound;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,7 +29,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ApiError> handleSpringMVCValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
 
         Map<String, String> errors = new HashMap<>();
 
@@ -36,7 +37,21 @@ public class GlobalExceptionHandler {
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "VALIDATION_FAILED", request.getRequestURI(), errors);
+        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "SPRING_MVC_VALIDATION_FAILED", request.getRequestURI(), errors);
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleJakartaValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiError response = new ApiError(LocalDateTime.now(), status.value(), status.getReasonPhrase(), "JAKARTA_VALIDATION_FAILED", request.getRequestURI(), errors);
 
         return ResponseEntity.badRequest().body(response);
     }
